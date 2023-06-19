@@ -115,25 +115,26 @@ void main()	{
     vec3 position = texture2D(positionsTexture, uv).xyz;
     vec3 rotation = texture2D(forces, uv).xyz; 
 
-    float maxSpeed = 1.0;
-    float maxForce = 2.0;
+    float maxSpeed = 0.2;
+    float maxForce = 1.0;
 
     vec3 acceleration = vec3(0.0);
 
     float distanceToMouse = distance(position, uMouse);
-    distanceToMouse = step(distanceToMouse, 0.1);
+    distanceToMouse = step(distanceToMouse, 0.2);
 
-    vec3 force = rotation * distanceToMouse * maxForce;
+    vec3 force = rotation * distanceToMouse;
+
     acceleration = applyForce(force, acceleration, maxForce);
-
+    
     // distance to original position
     vec3 originalPosition = texture2D(originalPositions, uv).xyz;
     float distanceToOriginalPosition = distance(position, originalPosition);
-  
-    // if (distanceToOriginalPosition > 0.1) {
-    //   vec3 seekForce = seek(originalPosition, position, velocity, true, maxSpeed, maxForce);
-    //   acceleration += applyForce(seekForce, acceleration, maxForce);
-    // }
+    vec3 gravity = vec3(0.0, -0.1, 0.0);
+
+    if (distanceToOriginalPosition > 0.1) {
+       acceleration += applyForce(gravity, acceleration, maxForce);
+    }
 
     velocity = updateVelocity(acceleration, velocity, 0.1);
     gl_FragColor = vec4(velocity, 1.0);
