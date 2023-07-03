@@ -8,7 +8,7 @@ import { useThree, useFrame } from "@react-three/fiber"
 import velocity from "../shaders/simulation/velocity.glsl"
 import position from "../shaders/simulation/position.glsl"
 
-const r = 5
+const r = 10
 
 const curve = new THREE.CatmullRomCurve3(
   new Array(20).fill(0).map((_, i) => {
@@ -21,11 +21,7 @@ const curve = new THREE.CatmullRomCurve3(
   true
 )
 
-const tangent = new THREE.Vector3()
-const axis = new THREE.Vector3()
-const up = new THREE.Vector3(0, 1, 0)
-
-export const useSimulation = (
+export const useSpark = (
   size: number
 ): [GPUComputationRenderer, Variable, Variable] => {
   const { gl } = useThree()
@@ -34,14 +30,26 @@ export const useSimulation = (
   const [gpuCompute, positionTexture, velocityTexture] = useMemo(() => {
     const gpuRender = new GPUComputationRenderer(size, size, gl)
 
-    const dtPosition = new THREE.DataTexture(
-      Float32Array.from(
-        new Array(size * size * 4).fill(0).flatMap((_, i) => {
-          const point = curve.getPoint(i / (size * size))
+    const positionsArray = Float32Array.from(
+      new Array(size * size * 4).fill(0).flatMap((_, i) => {
+        return [0, 0, 0, 1]
+      })
+    )
 
-          return [point.x, point.y, point.z, 1]
-        })
-      ),
+    const velocityArray = Float32Array.from(
+      new Array(size * size * 4).fill(0).flatMap((_, i) => {
+        const direction = new THREE.Vector3(
+          Math.random() * 2 - 1,
+          Math.random() * 2 - 1,
+          0
+        ).setLength(0.5)
+
+        return [direction.x, direction.y, direction.z, 1]
+      })
+    )
+
+    const dtPosition = new THREE.DataTexture(
+      positionsArray,
       size,
       size,
       THREE.RGBAFormat,
@@ -51,20 +59,7 @@ export const useSimulation = (
     dtPosition.needsUpdate = true
 
     const dtVelocity = new THREE.DataTexture(
-      Float32Array.from(
-        new Array(size * size * 4).fill(0).flatMap((_, i) => {
-          const tangent = curve.getTangent(i / (size * size)).normalize()
-          axis.crossVectors(up, tangent).normalize()
-
-          const radians = Math.acos(up.dot(tangent))
-          const q = new THREE.Quaternion()
-          q.setFromAxisAngle(axis, radians)
-
-          const velocity = new THREE.Vector3(0, 1, 0).applyQuaternion(q)
-
-          return [velocity.x, velocity.y, velocity.z, 1]
-        })
-      ),
+      velocityArray,
       size,
       size,
       THREE.RGBAFormat,
@@ -98,18 +93,19 @@ export const useSimulation = (
 
     // attributes
     //* particle attributes
+    const attributesVector = Float32Array.from(
+      new Array(size * size * 4).fill(0).flatMap(() => [
+        // maxSpeed
+        0.5,
+        // maxForce
+        1.0,
+        // lifespan
+        0.25, 1,
+      ])
+    )
+
     const dtAttributes = new THREE.DataTexture(
-      Float32Array.from(
-        new Array(size * size * 4).fill(0).flatMap(() => [
-          // maxSpeed
-          0.5,
-          // maxForce
-          1.0,
-          // lifespan
-          0.1 + Math.random() * 3,
-          1,
-        ])
-      ),
+      attributesVector,
       size,
       size,
       THREE.RGBAFormat,
@@ -133,6 +129,10 @@ export const useSimulation = (
     velocityTexture.material.uniforms.depth = { value: 10 }
 
     velocityTexture.material.uniforms.originalPositions = {
+      value: dtPosition.clone(),
+    }
+
+    positionTexture.material.uniforms.originalPositions = {
       value: dtPosition.clone(),
     }
 

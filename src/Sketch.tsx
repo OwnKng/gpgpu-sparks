@@ -2,22 +2,15 @@ import { useRef } from "react"
 import { useFrame } from "@react-three/fiber"
 import * as THREE from "three"
 import "./SketchMaterial"
-import { useSimulation } from "./hooks/useSimulation"
+import { useSpark } from "./hooks/useSpark"
 import { useGLTF } from "@react-three/drei"
+
+const size = 10
 
 const Sketch = () => {
   const materialRef = useRef<THREE.ShaderMaterial>(null!)
 
-  const { nodes } = useGLTF(
-    "https://vazxmixjsiawhamofees.supabase.co/storage/v1/object/public/models/suzanne-high-poly/model.gltf"
-  )
-
-  const mesh = new THREE.Mesh(
-    nodes.Suzanne.geometry,
-    new THREE.MeshBasicMaterial()
-  )
-
-  const [simulation, size, positions, velocity] = useSimulation(mesh)
+  const [simulation, positions, velocity] = useSpark(size)
 
   // Buffer attributes for the presentational layer
   const pIndex = Float32Array.from(
@@ -44,7 +37,7 @@ const Sketch = () => {
   return (
     <>
       <instancedMesh args={[undefined, undefined, size * size]}>
-        <boxGeometry args={[0.01, 0.01, 0.01]}>
+        <boxGeometry args={[0.1, 0.1, 1.0]}>
           <instancedBufferAttribute
             attach='attributes-pIndex'
             args={[pIndex, 2]}
@@ -57,17 +50,6 @@ const Sketch = () => {
           blending={THREE.AdditiveBlending}
         />
       </instancedMesh>
-      <mesh
-        geometry={nodes.Suzanne.geometry}
-        onPointerMove={(e) => {
-          velocity.material.uniforms.uMouse.value = e.point
-        }}
-        onPointerLeave={() => {
-          velocity.material.uniforms.uMouse.value = new THREE.Vector3(0, 0, 0)
-        }}
-      >
-        <meshBasicMaterial transparent opacity={0} />
-      </mesh>
     </>
   )
 }

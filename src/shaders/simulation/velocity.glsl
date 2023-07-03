@@ -1,12 +1,13 @@
-uniform float uTime;
+uniform float time;
 uniform float delta;
 uniform vec3 uMouse;
 uniform float width; 
 uniform float height;
 uniform float depth; 
 
-uniform sampler2D forces; 
+uniform sampler2D attributesTexture; 
 uniform sampler2D originalPositions; 
+uniform sampler2D originalVelocities; 
 
 //_ some utilities
 float map(float value, float min1, float max1, float min2, float max2) {
@@ -113,29 +114,25 @@ void main()	{
     
     vec3 velocity = texture2D(velocityTexture, uv).xyz;
     vec3 position = texture2D(positionsTexture, uv).xyz;
-    vec3 rotation = texture2D(forces, uv).xyz; 
+    vec4 attributes = texture2D(attributesTexture, uv);
+    vec3 originalVelocity = texture2D(originalVelocities, uv).xyz;
 
-    float maxSpeed = 0.2;
-    float maxForce = 1.0;
+    float maxSpeed = attributes.x;
+    float maxForce = attributes.y;
+    float lifespan = attributes.z;
 
     vec3 acceleration = vec3(0.0);
 
-    float distanceToMouse = distance(position, uMouse);
-    distanceToMouse = step(distanceToMouse, 0.2);
-
-    vec3 force = rotation * distanceToMouse;
-
-    acceleration = applyForce(force, acceleration, maxForce);
-    
-    // distance to original position
-    vec3 originalPosition = texture2D(originalPositions, uv).xyz;
-    float distanceToOriginalPosition = distance(position, originalPosition);
     vec3 gravity = vec3(0.0, -0.1, 0.0);
+    acceleration += applyForce(gravity, acceleration, maxForce);
+    
+    // create a modulated time which counts from 0 to 5 seconds
+    float wave = round(fract(time * 2.0));
 
-    if (distanceToOriginalPosition > 0.1) {
-       acceleration += applyForce(gravity, acceleration, maxForce);
-    }
+	if (wave == 0.0) {
+		velocity = originalVelocity;
+	}
 
-    velocity = updateVelocity(acceleration, velocity, 0.1);
+    velocity = updateVelocity(acceleration, velocity, maxSpeed);
     gl_FragColor = vec4(velocity, 1.0);
 }
