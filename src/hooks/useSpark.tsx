@@ -8,19 +8,6 @@ import { useThree, useFrame } from "@react-three/fiber"
 import velocity from "../shaders/simulation/velocity.glsl"
 import position from "../shaders/simulation/position.glsl"
 
-const r = 10
-
-const curve = new THREE.CatmullRomCurve3(
-  new Array(20).fill(0).map((_, i) => {
-    const theta = (i / 20) * Math.PI * 2
-    const x = Math.cos(theta) * r
-    const y = Math.sin(theta) * r
-
-    return new THREE.Vector3(x, y, 0)
-  }),
-  true
-)
-
 export const useSpark = (
   size: number
 ): [GPUComputationRenderer, Variable, Variable] => {
@@ -37,12 +24,12 @@ export const useSpark = (
     )
 
     const velocityArray = Float32Array.from(
-      new Array(size * size * 4).fill(0).flatMap((_, i) => {
+      new Array(size * size * 4).fill(0).flatMap(() => {
         const direction = new THREE.Vector3(
-          Math.random() * 2 - 1,
-          Math.random() * 2 - 1,
+          Math.random() - 0.5,
+          Math.random() - 0.5,
           0
-        ).setLength(0.5)
+        )
 
         return [direction.x, direction.y, direction.z, 1]
       })
@@ -96,11 +83,12 @@ export const useSpark = (
     const attributesVector = Float32Array.from(
       new Array(size * size * 4).fill(0).flatMap(() => [
         // maxSpeed
-        0.5,
+        1.0,
         // maxForce
         1.0,
         // lifespan
-        0.25, 1,
+        0.25 + Math.random() * 0.75,
+        1,
       ])
     )
 
@@ -154,6 +142,18 @@ export const useSpark = (
 
     positionTexture.material.uniforms.attributesTexture = {
       value: dtAttributes.clone(),
+    }
+
+    positionTexture.material.uniforms.originPoint = {
+      value: new THREE.Vector3(0, 0, 0),
+    }
+
+    velocityTexture.material.uniforms.dragForce = {
+      value: 0,
+    }
+
+    velocityTexture.material.uniforms.dragDirection = {
+      value: new THREE.Vector3(0, 0, 0),
     }
 
     positionTexture.wrapS = THREE.RepeatWrapping

@@ -5,8 +5,10 @@ uniform float width;
 uniform float height;
 uniform float depth; 
 
+uniform vec3 dragDirection; 
+uniform float dragForce; 
+
 uniform sampler2D attributesTexture; 
-uniform sampler2D originalPositions; 
 uniform sampler2D originalVelocities; 
 
 //_ some utilities
@@ -122,17 +124,20 @@ void main()	{
     float lifespan = attributes.z;
 
     vec3 acceleration = vec3(0.0);
-
-    vec3 gravity = vec3(0.0, -0.1, 0.0);
-    acceleration += applyForce(gravity, acceleration, maxForce);
     
-    // create a modulated time which counts from 0 to 5 seconds
-    float wave = round(fract(time * 2.0));
-
-	if (wave == 0.0) {
-		velocity = originalVelocity;
-	}
+    vec3 gravity = vec3(0.0, -0.25, 0.0);
+    acceleration += applyForce(gravity, acceleration, maxForce);
 
     velocity = updateVelocity(acceleration, velocity, maxSpeed);
+
+    // create a modulated time which counts from 0 to 5 seconds
+	float t = fract(time * lifespan);
+
+	if (t < 0.05) {
+        //velocity = originalVelocity;
+		velocity = (originalVelocity + dragDirection) * dragForce; 
+	}
+
+
     gl_FragColor = vec4(velocity, 1.0);
 }
