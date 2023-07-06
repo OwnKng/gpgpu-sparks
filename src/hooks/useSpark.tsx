@@ -26,8 +26,8 @@ export const useSpark = (
     const velocityArray = Float32Array.from(
       new Array(size * size * 4).fill(0).flatMap(() => {
         const direction = new THREE.Vector3(
-          Math.random() - 0.5,
-          Math.random() - 0.5,
+          Math.random() - 0.1,
+          Math.random() - 0.1,
           0
         )
 
@@ -83,11 +83,11 @@ export const useSpark = (
     const attributesVector = Float32Array.from(
       new Array(size * size * 4).fill(0).flatMap(() => [
         // maxSpeed
-        1.0,
+        5.0,
         // maxForce
         1.0,
         // lifespan
-        0.25 + Math.random() * 0.75,
+        0.25 + Math.random() * 0.2,
         1,
       ])
     )

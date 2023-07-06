@@ -3,7 +3,6 @@ import { useFrame, useThree } from "@react-three/fiber"
 import * as THREE from "three"
 import "./SketchMaterial"
 import { useSpark } from "./hooks/useSpark"
-import { useGLTF } from "@react-three/drei"
 
 const size = 256
 
@@ -55,9 +54,9 @@ const Sketch = () => {
     materialRef.current.uniforms.uTime.value = state.clock.getElapsedTime()
     materialRef.current.uniforms.delta.value = delta
 
-    // const progress = (state.clock.getElapsedTime() * 0.5) % 1
+    const progress = (state.clock.getElapsedTime() * 0.5) % 1
 
-    // mousePosition.current = curve.getPointAt(progress)
+    mousePosition.current = curve.getPointAt(progress)
 
     const direction = tempVector
       .copy(mousePosition.current)
@@ -82,7 +81,7 @@ const Sketch = () => {
         <meshBasicMaterial transparent={true} opacity={0} />
       </mesh>
       <instancedMesh args={[undefined, undefined, size * size]}>
-        <boxGeometry args={[0.1, 0.1, 0.8]}>
+        <boxGeometry args={[0.1, 0.1, 0.75]}>
           <instancedBufferAttribute
             attach='attributes-pIndex'
             args={[pIndex, 2]}
@@ -97,9 +96,5 @@ const Sketch = () => {
     </>
   )
 }
-
-useGLTF.preload(
-  "https://vazxmixjsiawhamofees.supabase.co/storage/v1/object/public/models/suzanne-high-poly/model.gltf"
-)
 
 export default Sketch

@@ -125,7 +125,7 @@ void main()	{
 
     vec3 acceleration = vec3(0.0);
     
-    vec3 gravity = vec3(0.0, -0.25, 0.0);
+    vec3 gravity = vec3(0.0, -1.0, 0.0);
     acceleration += applyForce(gravity, acceleration, maxForce);
 
     velocity = updateVelocity(acceleration, velocity, maxSpeed);
@@ -134,7 +134,6 @@ void main()	{
 	float t = fract(time * lifespan);
 
 	if (t < 0.05) {
-        //velocity = originalVelocity;
 		velocity = (originalVelocity + dragDirection) * dragForce; 
 	}
 
