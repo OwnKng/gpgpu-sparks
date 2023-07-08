@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { useRef } from "react"
 import { useFrame } from "@react-three/fiber"
 import * as THREE from "three"
@@ -81,6 +82,7 @@ const Sketch = () => {
             args={[pIndex, 2]}
           />
         </boxGeometry>
+        {/* @ts-ignore */}
         <sketchMaterial
           ref={materialRef}
           transparent={true}
