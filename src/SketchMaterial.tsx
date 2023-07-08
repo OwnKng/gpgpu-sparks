@@ -79,8 +79,8 @@ const SketchMaterial = shaderMaterial(
   }
 
   void main() {
-    float lightness = map(vLifespan, 0.0, 2.0, 0.0, 1.0);
-    float hue = mix(0.55, 0.6, lightness); 
+    float hue = mix(0.55, 0.6, vLifespan); 
+    float lightness = 1.0 - max(vLifespan, 0.8);
     
     vec3 color = hsl2rgb(hue, 0.8, lightness);
 

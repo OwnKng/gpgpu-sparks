@@ -18,7 +18,7 @@ export const useSpark = (
     const gpuRender = new GPUComputationRenderer(size, size, gl)
 
     const positionsArray = Float32Array.from(
-      new Array(size * size * 4).fill(0).flatMap((_, i) => {
+      new Array(size * size * 4).fill(0).flatMap(() => {
         return [0, 0, 0, 1]
       })
     )
@@ -28,7 +28,7 @@ export const useSpark = (
         const direction = new THREE.Vector3(
           Math.random() - 0.1,
           Math.random() - 0.1,
-          0
+          Math.random() - 0.05
         )
 
         return [direction.x, direction.y, direction.z, 1]
@@ -83,11 +83,11 @@ export const useSpark = (
     const attributesVector = Float32Array.from(
       new Array(size * size * 4).fill(0).flatMap(() => [
         // maxSpeed
-        5.0,
+        1.1 - Math.random() * 0.5,
         // maxForce
         1.0,
         // lifespan
-        0.25 + Math.random() * 0.2,
+        0.1 + Math.random() * 0.2,
         1,
       ])
     )
